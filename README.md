@@ -41,6 +41,12 @@ print(report.render())
 
 Write your own: any `(output: str) -> bool` callable.
 
+## Tips
+
+- Keep cases tiny and focused; one behavior per case.
+- Run locally before you ship a prompt change — same idea as unit tests.
+- Combine with `llm-trace` to also log cost and latency.
+
 ## License
 
 MIT
