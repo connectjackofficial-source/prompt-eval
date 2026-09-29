@@ -37,6 +37,12 @@ def not_contains(substring: str) -> Callable[[str], bool]:
     return _check
 
 
+def length_between(min_chars: int, max_chars: int) -> Callable[[str], bool]:
+    def _check(out: str) -> bool:
+        return min_chars <= len(out) <= max_chars
+    return _check
+
+
 @dataclass
 class Report:
     passed: int = 0
