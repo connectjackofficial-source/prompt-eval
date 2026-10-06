@@ -49,8 +49,14 @@ class Report:
     failed: int = 0
     failures: list = field(default_factory=list)
 
+    @property
+    def score(self) -> float:
+        total = self.passed + self.failed
+        return round(self.passed / total, 3) if total else 1.0
+
     def render(self) -> str:
-        lines = [f"prompt-eval: {self.passed} passed, {self.failed} failed"]
+        lines = [f"prompt-eval: {self.passed} passed, {self.failed} failed "
+                 f"(score {self.score})"]
         for name, out in self.failures:
             lines.append(f"  FAIL {name}: output={out[:120]!r}")
         return "\n".join(lines)
