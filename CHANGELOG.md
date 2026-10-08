@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.0 - 2026-10-08
+
+- `starts_with` / `ends_with` checkers
+- Per-case latency tracking (`timings`, `avg_latency_ms`)
+
 ## 0.2.0 - 2026-10-06
 
 - Score (pass rate) in reports
