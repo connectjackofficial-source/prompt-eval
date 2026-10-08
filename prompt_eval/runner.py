@@ -43,20 +43,47 @@ def length_between(min_chars: int, max_chars: int) -> Callable[[str], bool]:
     return _check
 
 
+def starts_with(prefix: str) -> Callable[[str], bool]:
+    """Pass if output starts with the prefix (case-insensitive)."""
+    p = prefix.lower()
+    return lambda out: out.lower().startswith(p)
+
+
+def ends_with(suffix: str) -> Callable[[str], bool]:
+    """Pass if output ends with the suffix (case-insensitive)."""
+    s = suffix.lower()
+    return lambda out: out.lower().endswith(s)
+
+
+@dataclass
+class CaseResult:
+    name: str
+    passed: bool
+    output: str
+    latency_ms: float
+
+
 @dataclass
 class Report:
     passed: int = 0
     failed: int = 0
     failures: list = field(default_factory=list)
+    timings: list = field(default_factory=list)
 
     @property
     def score(self) -> float:
         total = self.passed + self.failed
         return round(self.passed / total, 3) if total else 1.0
 
+    @property
+    def avg_latency_ms(self) -> float:
+        if not self.timings:
+            return 0.0
+        return round(sum(self.timings) / len(self.timings), 2)
+
     def render(self) -> str:
         lines = [f"prompt-eval: {self.passed} passed, {self.failed} failed "
-                 f"(score {self.score})"]
+                 f"(score {self.score}, avg {self.avg_latency_ms}ms/case)"]
         for name, out in self.failures:
             lines.append(f"  FAIL {name}: output={out[:120]!r}")
         return "\n".join(lines)
@@ -64,9 +91,13 @@ class Report:
 
 def run(prompt_fn: Callable[[str], str], cases: list[Case]) -> Report:
     """Run prompt_fn(prompt) for each case and check output."""
+    import time
     report = Report()
     for case in cases:
+        t0 = time.perf_counter()
         output = prompt_fn(case.prompt)
+        elapsed = (time.perf_counter() - t0) * 1000
+        report.timings.append(round(elapsed, 2))
         if case.check(output):
             report.passed += 1
         else:
