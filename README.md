@@ -38,8 +38,21 @@ print(report.render())
 - `contains("text")`
 - `matches(r"regex")`
 - `not_contains("text")`
+- `length_between(min, max)`
+- `starts_with("prefix")`
+- `ends_with("suffix")`
 
 Write your own: any `(output: str) -> bool` callable.
+
+## Per-case latency
+
+`Report` tracks timing automatically:
+
+```python
+report = run(my_prompt, cases)
+print(report.avg_latency_ms)  # mean ms per case
+print(report.timings)         # per case, in order
+```
 
 ## Tips
 
