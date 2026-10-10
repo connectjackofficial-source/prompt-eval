@@ -63,6 +63,22 @@ report = run_and_save(my_prompt, cases, "eval-report.json")
 # {"passed": 3, "failed": 1, "score": 0.75, "avg_latency_ms": 42.0, ...}
 ```
 
+## Cases from plain dicts
+
+For CI pipelines that keep test cases in YAML/JSON instead of code:
+
+```python
+from prompt_eval.runner import cases_from_dict, run
+
+spec = [
+    {"name": "has-answer", "prompt": "what is 2+2?",
+     "check": "contains", "check_args": ["4"]},
+    {"name": "length", "prompt": "hi", "check": "length_between",
+     "check_args": [3, 8]},
+]
+report = run(my_prompt, cases_from_dict(spec))
+```
+
 ## Tips
 
 - Keep cases tiny and focused; one behavior per case.

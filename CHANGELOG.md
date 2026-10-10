@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.0 - 2026-10-10
+
+- `cases_from_dict()` — build cases from plain dict/JSON specs
+- `CHECKER_BUILDERS` registry for named checkers
+
 ## 0.4.0 - 2026-10-10
 
 - `Report.to_json()` machine-readable reports
