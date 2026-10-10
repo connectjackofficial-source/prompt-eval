@@ -54,6 +54,15 @@ print(report.avg_latency_ms)  # mean ms per case
 print(report.timings)         # per case, in order
 ```
 
+## JSON reports (CI-friendly)
+
+```python
+from prompt_eval.runner import run_and_save
+
+report = run_and_save(my_prompt, cases, "eval-report.json")
+# {"passed": 3, "failed": 1, "score": 0.75, "avg_latency_ms": 42.0, ...}
+```
+
 ## Tips
 
 - Keep cases tiny and focused; one behavior per case.
