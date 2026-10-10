@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.0 - 2026-10-10
+
+- `Report.to_json()` machine-readable reports
+- `run_and_save()` writes the report to a file
+
 ## 0.3.0 - 2026-10-08
 
 - `starts_with` / `ends_with` checkers
