@@ -126,3 +126,35 @@ def run_and_save(prompt_fn: Callable[[str], str], cases: list[Case],
     report = run(prompt_fn, cases)
     Path(path).write_text(report.to_json(), encoding="utf-8")
     return report
+
+
+# name -> builder(arguments-list) -> checker callable
+CHECKER_BUILDERS = {
+    "contains": lambda a: contains(a[0]),
+    "not_contains": lambda a: not_contains(a[0]),
+    "matches": lambda a: matches(a[0]),
+    "starts_with": lambda a: starts_with(a[0]),
+    "ends_with": lambda a: ends_with(a[0]),
+    "length_between": lambda a: length_between(a[0], a[1]),
+}
+
+
+def cases_from_dict(spec: list) -> list:
+    """Build Case objects from a plain dict/JSON spec.
+
+    Each item: {"name", "prompt", "check", "check_args", "description"?}
+    """
+    cases = []
+    for item in spec:
+        name = item["name"]
+        prompt = item["prompt"]
+        checker = item["check"]
+        args = item.get("check_args", [])
+        if checker not in CHECKER_BUILDERS:
+            raise ValueError(
+                f"unknown checker '{checker}' for case '{name}'; "
+                f"use one of: {', '.join(sorted(CHECKER_BUILDERS))}")
+        check_fn = CHECKER_BUILDERS[checker](args)
+        cases.append(Case(name=name, prompt=prompt, check=check_fn,
+                          description=item.get("description", "")))
+    return cases
