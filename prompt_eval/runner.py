@@ -88,6 +88,19 @@ class Report:
             lines.append(f"  FAIL {name}: output={out[:120]!r}")
         return "\n".join(lines)
 
+    def to_json(self) -> str:
+        """Machine-readable report for CI or dashboards."""
+        import json
+        payload = {
+            "passed": self.passed,
+            "failed": self.failed,
+            "score": self.score,
+            "avg_latency_ms": self.avg_latency_ms,
+            "failures": [{"case": name, "output": out[:200]}
+                         for name, out in self.failures],
+        }
+        return json.dumps(payload, indent=2)
+
 
 def run(prompt_fn: Callable[[str], str], cases: list[Case]) -> Report:
     """Run prompt_fn(prompt) for each case and check output."""
@@ -103,4 +116,13 @@ def run(prompt_fn: Callable[[str], str], cases: list[Case]) -> Report:
         else:
             report.failed += 1
             report.failures.append((case.name, output))
+    return report
+
+
+def run_and_save(prompt_fn: Callable[[str], str], cases: list[Case],
+                 path: str) -> Report:
+    """Run the eval and write the JSON report to *path*."""
+    from pathlib import Path
+    report = run(prompt_fn, cases)
+    Path(path).write_text(report.to_json(), encoding="utf-8")
     return report
