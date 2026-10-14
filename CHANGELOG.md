@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.0 - 2026-10-14
+
+- `rank_cases()` — run every case and rank results: failures first, then
+  by latency, so the weakest prompt behaviors surface first
+
 ## 0.5.0 - 2026-10-10
 
 - `cases_from_dict()` — build cases from plain dict/JSON specs
