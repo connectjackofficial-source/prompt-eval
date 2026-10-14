@@ -119,6 +119,26 @@ def run(prompt_fn: Callable[[str], str], cases: list[Case]) -> Report:
     return report
 
 
+def rank_cases(prompt_fn: Callable[[str], str], cases: list[Case]) -> list:
+    """Run every case and rank the results: failures first, then latency.
+
+    Returns [{"name", "passed", "output", "latency_ms"}] so the weakest
+    prompt behaviors surface at the top of the list for a quick scan.
+    """
+    import time
+    results = []
+    for case in cases:
+        t0 = time.perf_counter()
+        output = prompt_fn(case.prompt)
+        elapsed = (time.perf_counter() - t0) * 1000
+        results.append({"name": case.name,
+                        "passed": bool(case.check(output)),
+                        "output": output[:120],
+                        "latency_ms": round(elapsed, 2)})
+    results.sort(key=lambda r: (r["passed"], r["latency_ms"]))
+    return results
+
+
 def run_and_save(prompt_fn: Callable[[str], str], cases: list[Case],
                  path: str) -> Report:
     """Run the eval and write the JSON report to *path*."""
