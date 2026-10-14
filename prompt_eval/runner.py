@@ -139,6 +139,32 @@ def rank_cases(prompt_fn: Callable[[str], str], cases: list[Case]) -> list:
     return results
 
 
+def compare_prompts(prompt_a: Callable[[str], str],
+                    prompt_b: Callable[[str], str],
+                    cases: list[Case]) -> dict:
+    """Head-to-head between two prompt strategies on the same cases.
+
+    Runs both prompt functions over the same case list and returns
+    {"a": {...}, "b": {...}, "winner": "a"|"b"} where each side carries
+    passed/failed/score/avg latency and wall-clock time. Winning order:
+    score first, then latency (faster wins ties).
+    """
+    import time
+
+    def _run(pfn):
+        t0 = time.perf_counter()
+        r = run(pfn, cases)
+        return {"passed": r.passed, "failed": r.failed,
+                "score": r.score,
+                "avg_latency_ms": r.avg_latency_ms,
+                "wall_ms": round((time.perf_counter() - t0) * 1000, 1)}
+
+    a, b = _run(prompt_a), _run(prompt_b)
+    key = lambda x: (x["score"], -x["avg_latency_ms"])
+    winner = "a" if key(a) > key(b) else "b"
+    return {"a": a, "b": b, "winner": winner}
+
+
 def run_and_save(prompt_fn: Callable[[str], str], cases: list[Case],
                  path: str) -> Report:
     """Run the eval and write the JSON report to *path*."""
