@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.7.0 - 2026-10-14
+
+- `compare_prompts()` — head-to-head A/B of two prompt strategies on the
+  same cases (score first, latency breaks ties)
+
 ## 0.6.0 - 2026-10-14
 
 - `rank_cases()` — run every case and rank results: failures first, then
