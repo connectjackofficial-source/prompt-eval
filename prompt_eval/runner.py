@@ -165,6 +165,34 @@ def compare_prompts(prompt_a: Callable[[str], str],
     return {"a": a, "b": b, "winner": winner}
 
 
+def report_stats(report: Report, percentiles=(50, 95, 99)) -> dict:
+    """Aggregate a report into summary statistics.
+
+    Returns {"passed", "failed", "score", "avg_latency_ms",
+    "p50_ms", "p95_ms", "p99_ms", "max_latency_ms"} — the numbers you
+    want on a CI badge or in a regression diff.
+    """
+    timings = sorted(report.timings)
+    n = len(timings)
+
+    def pct(p):
+        if n == 0:
+            return 0.0
+        idx = max(0, min(n - 1, int((p / 100.0) * n)))
+        return round(timings[idx], 2)
+
+    return {
+        "passed": report.passed,
+        "failed": report.failed,
+        "score": report.score,
+        "avg_latency_ms": report.avg_latency_ms,
+        "p50_ms": pct(percentiles[0] if percentiles else 50),
+        "p95_ms": pct(percentiles[1] if len(percentiles) > 1 else 95),
+        "p99_ms": pct(percentiles[2] if len(percentiles) > 2 else 99),
+        "max_latency_ms": round(max(timings), 2) if timings else 0.0,
+    }
+
+
 def run_and_save(prompt_fn: Callable[[str], str], cases: list[Case],
                  path: str) -> Report:
     """Run the eval and write the JSON report to *path*."""
