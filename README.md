@@ -79,6 +79,20 @@ spec = [
 report = run(my_prompt, cases_from_dict(spec))
 ```
 
+## Flaky detection & splits
+
+LLM outputs are non-deterministic, so a single pass/fail can mislead.
+Run each case several times and flag flip-floppers:
+
+```python
+from prompt_eval.runner import stability_check, split_cases
+
+# [{"name": "has-answer", "passes": 3, "runs": 5, "rate": 0.6, "flaky": true}, ...]
+print(stability_check(my_prompt, cases, runs=5))
+
+train, test = split_cases(cases, ratio=0.8, seed=42)  # reproducible
+```
+
 ## Tips
 
 - Keep cases tiny and focused; one behavior per case.
