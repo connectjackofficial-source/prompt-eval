@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.8.0 - 2026-10-18
+
+- `stability_check()` — run each case N times and flag flaky pass/fail
+  rates (LLM outputs are non-deterministic; one run can mislead)
+- `split_cases()` — deterministic train/test split with a seed for
+  reproducible eval harnesses
+
 ## 0.7.0 - 2026-10-14
 
 - `compare_prompts()` — head-to-head A/B of two prompt strategies on the
