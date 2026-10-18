@@ -232,3 +232,32 @@ def cases_from_dict(spec: list) -> list:
         cases.append(Case(name=name, prompt=prompt, check=check_fn,
                           description=item.get("description", "")))
     return cases
+
+
+def stability_check(prompt_fn: Callable[[str], str], cases: list[Case],
+                    runs: int = 5) -> list:
+    """Run every case *runs* times and report pass-rate volatility.
+
+    LLM outputs are non-deterministic, so a single pass/fail per case
+    can mislead. Returns per-case [{"name", "passes", "runs", "rate",
+    "flaky"}] where ``flaky`` is True when the rate is strictly between
+    0 and 1 (the case flip-flops across runs).
+    """
+    out = []
+    for case in cases:
+        passes = sum(1 for _ in range(runs)
+                     if case.check(prompt_fn(case.prompt)))
+        rate = passes / runs
+        out.append({"name": case.name, "passes": passes, "runs": runs,
+                    "rate": rate, "flaky": 0 < rate < 1})
+    return out
+
+
+def split_cases(cases: list, ratio: float = 0.8, seed: int = 0):
+    """Deterministically split cases into (train, test) by ratio."""
+    import random
+    rng = random.Random(seed)
+    pool = list(cases)
+    rng.shuffle(pool)
+    cut = max(1, int(len(pool) * ratio)) if pool else 0
+    return pool[:cut], pool[cut:]
